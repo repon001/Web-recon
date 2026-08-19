@@ -86,6 +86,7 @@ since every HTTP call is made server-side.
 | `npm run build` | Production build, including a full TypeScript check |
 | `npm start` | Serve the production build |
 | `npm run lint` | ESLint, including the React hooks rules |
+| `npm run e2e` | Drives a real browser through the whole app — see [`e2e/`](e2e/) |
 
 ---
 
@@ -288,7 +289,7 @@ header shell for signed-in ones.
 | **One socket per open report** | Fine for a person watching a scan, not for a wall display with fifty tabs |
 | **No optimistic UI** | Cancel and delete wait for the server. The round trip is short and a scan that "cancelled" and then did not would be worse |
 | **Polling is 5s** | Hard-coded in the list page. A long backlog of running scans will feel slower than the socket does |
-| **No tests** | Verified by exercising every route against the real backend. A Playwright suite is the obvious next step |
+| **One e2e script, no unit tests** | `npm run e2e` covers the journeys end to end, but there is nothing testing `grading`-adjacent pure functions like `formatDuration` in isolation |
 | **Access log exposure** | The WebSocket token is in a query string, so it lands in proxy logs. Short-lived, but exclude the query string from your access log format |
 
 ### Where to take it
