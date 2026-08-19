@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { GradeBadge } from "@/components/scans/grade-badge";
+import { LiveScanProgress } from "@/components/scans/live-scan-progress";
 import { ExposuresSection } from "@/components/scans/report/exposures-section";
 import { FindingsSection } from "@/components/scans/report/findings-section";
 import { HeadersSection } from "@/components/scans/report/headers-section";
@@ -17,7 +18,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import { ApiError } from "@/lib/api/errors";
 import { getScan } from "@/lib/api/scans";
 import { isActiveStatus, type Scan } from "@/lib/api/types";
-import { formatDateTime, formatDuration, pluralise } from "@/lib/ui/format";
+import { formatDateTime, formatDuration } from "@/lib/ui/format";
 
 export async function generateMetadata({ params }: PageProps<"/scans/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -107,7 +108,19 @@ export default async function ScanPage({ params }: PageProps<"/scans/[id]">) {
         </Alert>
       ) : null}
 
-      {scan.result ? (
+      {active ? (
+        /*
+          Keyed on the scan id so navigating between two running scans tears the
+          socket down and opens a new one, rather than reusing the component and
+          streaming the wrong scan into it.
+        */
+        <LiveScanProgress
+          key={scan.id}
+          scanId={scan.id}
+          status={scan.status}
+          progress={scan.progress}
+        />
+      ) : scan.result ? (
         <>
           <FindingsSection findings={scan.result.findings} />
           <TransportSection result={scan.result} />
@@ -124,13 +137,13 @@ export default async function ScanPage({ params }: PageProps<"/scans/[id]">) {
             This reports configuration and exposure, not vulnerabilities.
           </p>
         </>
-      ) : !active ? (
+      ) : (
         <Card>
           <CardBody className="text-sm text-muted">
-            No report was produced. {pluralise(0, "finding")} recorded.
+            No report was produced. The scan ended before it reached the grading stage.
           </CardBody>
         </Card>
-      ) : null}
+      )}
     </div>
   );
 }
