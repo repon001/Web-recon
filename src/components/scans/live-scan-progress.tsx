@@ -107,14 +107,14 @@ export function LiveScanProgress({
       </Card>
 
       {stream.lagged ? (
-        <Alert tone="warning" title="Some events were dropped">
+        <Alert tone="warning" title="Some events were dropped" live>
           The server&rsquo;s queue for this connection overflowed, so the list below may be
           missing findings. The finished report will be complete.
         </Alert>
       ) : null}
 
       {stream.phase === "offline" ? (
-        <Alert tone="warning" title="Live updates unavailable">
+        <Alert tone="warning" title="Live updates unavailable" live>
           The progress socket could not be reopened, so this page is polling instead.
           The scan itself is unaffected.
         </Alert>

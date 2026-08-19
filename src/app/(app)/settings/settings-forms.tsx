@@ -32,7 +32,11 @@ export function ProfileForm({ user }: { user: User }) {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {state.error ? <Alert tone="danger">{state.error}</Alert> : null}
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      {state.success ? (
+        <Alert tone="success" live>
+          {state.success}
+        </Alert>
+      ) : null}
 
       <Field label="Name" error={fieldErrors.full_name} hint="Leave blank to remove it.">
         {(props) => (
@@ -74,7 +78,11 @@ export function PasswordForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {state.error ? <Alert tone="danger">{state.error}</Alert> : null}
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      {state.success ? (
+        <Alert tone="success" live>
+          {state.success}
+        </Alert>
+      ) : null}
 
       <Field label="New password" error={fieldErrors.password} hint="At least 8 characters.">
         {(props) => (

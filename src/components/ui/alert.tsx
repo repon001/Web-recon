@@ -14,25 +14,40 @@ const TONES: Record<Tone, string> = {
 /**
  * A message the user needs to notice.
  *
- * `role="alert"` on the error tones only. It interrupts a screen reader
- * mid-sentence, which is right for "that password was wrong" and rude for a
- * hint that was on the page all along.
+ * The `live` prop decides whether this is announced when it appears, and it is
+ * a separate question from the colour. An alert that was on the page all along
+ * — "only scan what you are allowed to scan" — is ordinary content, and marking
+ * it as a live region makes a screen reader interrupt itself to read a standing
+ * notice on every single page load. An alert that appeared *because the user
+ * just did something* is the opposite: if it is not announced, a keyboard user
+ * who submitted a form gets no feedback at all.
+ *
+ * So the default is "live only if this is an error", since an error tone is
+ * almost always a response to an action, and everything else opts in.
  */
 export function Alert({
   tone = "info",
   title,
   children,
   className,
+  live,
 }: {
   tone?: Tone;
   title?: ReactNode;
   children?: ReactNode;
   className?: string;
+  /** Announce this when it appears. Defaults to true for the danger tone. */
+  live?: boolean;
 }) {
-  const assertive = tone === "danger" || tone === "warning";
+  const announce = live ?? tone === "danger";
+
+  // `alert` interrupts; `status` waits for a pause. Something that went wrong
+  // earns the interruption, a confirmation does not.
+  const role = announce ? (tone === "danger" || tone === "warning" ? "alert" : "status") : undefined;
+
   return (
     <div
-      role={assertive ? "alert" : undefined}
+      role={role}
       className={cn("rounded-lg border px-3.5 py-3 text-sm", TONES[tone], className)}
     >
       {title ? <div className="font-medium">{title}</div> : null}
