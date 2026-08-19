@@ -23,8 +23,20 @@ import { isExpired, secondsUntilExpiry } from "@/lib/auth/jwt";
  * browser stops sending the old one.
  */
 
-/** Reachable signed out. Everything else needs a session. */
+/**
+ * Reachable signed out, and pointless once signed in — so a session bounces
+ * off these to the app.
+ */
 const PUBLIC_PATHS = ["/login", "/register"];
+
+/**
+ * Reachable either way, with no redirect in either direction.
+ *
+ * The landing page is the front door: a signed-out visitor needs to read it,
+ * and a signed-in one following a shared link should not be yanked somewhere
+ * else. It renders a different call to action instead.
+ */
+const OPEN_PATHS = ["/"];
 
 /** Where a freshly signed-in user lands. */
 const HOME_PATH = "/scans";
@@ -34,6 +46,11 @@ export async function middleware(request: NextRequest) {
   const isPublic = PUBLIC_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
+
+  // Checked before anything else touches a token: the landing page must render
+  // for a visitor with no cookies and for one with an expired session alike,
+  // and neither should cost a refresh round trip.
+  if (OPEN_PATHS.includes(pathname)) return NextResponse.next();
 
   const accessToken = request.cookies.get(ACCESS_COOKIE)?.value;
   const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
