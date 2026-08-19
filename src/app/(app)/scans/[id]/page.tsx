@@ -16,18 +16,24 @@ import { Alert } from "@/components/ui/alert";
 import { Card, CardBody } from "@/components/ui/card";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { ApiError } from "@/lib/api/errors";
-import { getScan } from "@/lib/api/scans";
+import { getScanOnce } from "@/lib/scans/get-scan";
 import { isActiveStatus, type Scan } from "@/lib/api/types";
 import { formatDateTime, formatDuration } from "@/lib/ui/format";
 
 export async function generateMetadata({ params }: PageProps<"/scans/[id]">): Promise<Metadata> {
   const { id } = await params;
   try {
-    const scan = await getScan(id);
+    const scan = await getScanOnce(id);
     return { title: `${scan.domain} · ${scan.grade ?? scan.status}` };
-  } catch {
-    // A title is not worth failing the page over; the page's own fetch will
-    // produce the real 404.
+  } catch (error) {
+    // The scan is missing, so there is no title to build. Next renders the
+    // not-found page from here just as it would from the body below.
+    //
+    // Worth knowing: on a dynamically rendered route Next commits the response
+    // before either of these runs, so the not-found *page* is correct but the
+    // *status* stays 200. That is framework behaviour, not an oversight here.
+    if (error instanceof ApiError && error.status === 404) notFound();
+    // Any other failure is the page's problem, not the title's.
     return { title: "Scan" };
   }
 }
@@ -37,7 +43,7 @@ export default async function ScanPage({ params }: PageProps<"/scans/[id]">) {
 
   let scan: Scan;
   try {
-    scan = await getScan(id);
+    scan = await getScanOnce(id);
   } catch (error) {
     // The backend answers 404 for someone else's scan too, never 403 — so ids
     // cannot be probed. Rendering the same not-found page keeps that property.
