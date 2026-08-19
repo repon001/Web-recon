@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { ApiError, messageFor } from "@/lib/api/errors";
 import * as scansApi from "@/lib/api/scans";
-import { SCAN_PROFILES } from "@/lib/api/types";
+import { SCAN_PROFILES, type ScanProfile } from "@/lib/api/types";
 
 export interface ScanFormState {
   error?: string;
@@ -77,6 +77,28 @@ export async function deleteScanAction(scanId: string): Promise<void> {
  * saying what to do instead. Anything else falls through to the API's own
  * wording, which is better than a generic apology.
  */
+/**
+ * Run the same scan again.
+ *
+ * Deliberately a new scan rather than an in-place re-run: the old report stays
+ * addressable, which is what makes "what changed since last week" answerable
+ * at all. Overwriting would destroy the only copy of the comparison.
+ */
+export async function rescanAction(
+  domain: string,
+  profile: ScanProfile,
+): Promise<{ error: string } | void> {
+  let scanId: string;
+  try {
+    const scan = await scansApi.createScan({ domain, profile });
+    scanId = scan.id;
+  } catch (error) {
+    return { error: explain(error) };
+  }
+  revalidatePath("/scans");
+  redirect(`/scans/${scanId}`);
+}
+
 function explain(error: unknown): string {
   if (!(error instanceof ApiError)) return messageFor(error);
 
