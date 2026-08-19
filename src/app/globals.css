@@ -1,26 +1,108 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens.
+ *
+ * Declared as plain CSS variables and then exposed to Tailwind through
+ * `@theme inline`, which is what makes `bg-surface` and `text-muted` exist as
+ * utilities. Doing it this way — rather than putting hex values directly in
+ * `@theme` — is what lets the dark palette be a variable swap instead of a
+ * second set of `dark:` classes on every element.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --background: #f6f7f9;
+  --surface: #ffffff;
+  --surface-muted: #f1f3f7;
+  --border: #e2e5eb;
+  --foreground: #101828;
+  --muted: #667085;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-foreground: #ffffff;
+  --ring: #a5b4fc;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Severity, in the backend's own worst-first order. */
+  --critical: #d92d20;
+  --high: #e04f16;
+  --medium: #b54708;
+  --low: #175cd3;
+  --info: #667085;
+
+  --success: #067647;
+  --warning: #b54708;
+  --danger: #d92d20;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0a0d14;
+    --surface: #12161f;
+    --surface-muted: #1a1f2b;
+    --border: #242b3a;
+    --foreground: #e8eaed;
+    --muted: #98a2b3;
+    --primary: #6366f1;
+    --primary-hover: #818cf8;
+    --primary-foreground: #ffffff;
+    --ring: #4f46e5;
+
+    --critical: #f97066;
+    --high: #fd853a;
+    --medium: #fdb022;
+    --low: #53b1fd;
+    --info: #98a2b3;
+
+    --success: #47cd89;
+    --warning: #fdb022;
+    --danger: #f97066;
   }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-ring: var(--ring);
+
+  --color-critical: var(--critical);
+  --color-high: var(--high);
+  --color-medium: var(--medium);
+  --color-low: var(--low);
+  --color-info: var(--info);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/*
+ * One focus style for the whole app.
+ *
+ * Set globally rather than per-component because a missed `focus-visible` on
+ * one button is invisible to a mouse user and a dead end for a keyboard one.
+ */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Long evidence strings — header values, certificate subjects — must wrap
+   rather than stretch their container off the side of the page. */
+.break-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
