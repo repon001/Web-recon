@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { AutoRefresh } from "@/components/scans/auto-refresh";
 import { ScanListItem } from "@/components/scans/scan-list-item";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -23,6 +24,9 @@ export default async function ScansPage({ searchParams }: PageProps<"/scans">) {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Only polls while something is actually moving. */}
+      <AutoRefresh enabled={running > 0} />
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Scans</h1>
